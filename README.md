@@ -4,7 +4,7 @@ This is an automated snakemake pipeline [1] for conducting local “blastn” se
 
 ## Prerequisites
 
-This pipeline can be run on desktop computers, but several requirements can be necessary:
+This pipeline can be run on desktop computers, but several requirements need to be fulfilled:
 
 * Linux or MacOS system
 * [BLAST&copy;](https://www.ncbi.nlm.nih.gov/books/NBK279690/)
