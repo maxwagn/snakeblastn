@@ -2,3 +2,4 @@ blast_db/
 .DS_Store
 .idea/
 .snakemake/
+testfile.py
