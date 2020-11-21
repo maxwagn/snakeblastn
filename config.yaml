@@ -1,0 +1,17 @@
+### Prepare local Blast database
+blast:
+  fasta_db: "/Users/maximilianwagner/Desktop/HOx_gene_BLAST/Gouania_outgroups.fasta" # local database in fasta format
+  db_name: "Gouania_outgroups" # name of your local database
+  query_fasta: "/Users/maximilianwagner/Desktop/HOx_gene_BLAST/VRNT_Queries/VRNT_Queries.fasta"
+  query_name:  "VRNT_Gouania_Salaria"
+
+filter_blast:
+  identity: 98 # percent ident needed
+  evalue: 1e-20
+
+muscle_alignment:
+  iterations: 2
+
+
+
+
