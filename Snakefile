@@ -6,6 +6,7 @@ jn = os.path.join
 ## Config
 configfile: "config.yaml"
 
+### Usage
 
 rule all:
     input:
