@@ -1,5 +1,4 @@
 blast_db/
 .DS_Store
 .idea/
-test.py
 .snakemake/

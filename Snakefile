@@ -86,7 +86,6 @@ rule bedtools_getfasta:
     shell:
         "bedtools getfasta -fi {input.fasta_db} -bed {input.bed} -fo {output.fasta}"
 
-
 rule reverse_complement:
     input:
         fasta = "alignments/{}_alignment.fa".format(config["blast"]["query_name"]),
