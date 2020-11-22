@@ -3,3 +3,4 @@ blast_db/
 .idea/
 testfile.py
 .snakemake/
+trash/
