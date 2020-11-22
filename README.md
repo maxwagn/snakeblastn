@@ -13,7 +13,7 @@ This pipeline can be run on desktop computers, but several requirements need to 
 
 ## DAG plot
 
-<img src="https://raw.githubusercontent.com/maxwagn/snakeblastn/c7ba2789f63e69a617f8a54bd950cb4624a749e7/dag.svg">
+<img src="https://raw.githubusercontent.com/maxwagn/snakeblastn/main/dag.svg">
 
 
 ### References
