@@ -30,7 +30,7 @@ rule blastn:
         "blast_db/checkpoint_blast_db.txt",
         query = config["blast"]["query_fasta"]
     output:
-        "reports/{}_BLAST.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST.tsv".format(config["blast"]["query_name"])
     params:
         tmp_out = "blast_tmp",
         db_name = "blast_db/{}".format(config["blast"]["db_name"])
@@ -43,9 +43,9 @@ rule blastn:
 
 rule filter_blast_report:
     input:
-        "reports/{}_BLAST.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST.tsv".format(config["blast"]["query_name"])
     output:
-        "reports/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST_filtered.tsv".format(config["blast"]["query_name"])
     params:
         e_value = config["filter_blast"]["evalue"],
         identity = config["filter_blast"]["identity"]
@@ -56,7 +56,7 @@ rule filter_blast_report:
 
 rule bedtools_prep:
     input:
-        "reports/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST_filtered.tsv".format(config["blast"]["query_name"])
     output:
         bed = "reports/{}_BLAST_filtered.bed".format(config["blast"]["query_name"]),
         rev_compliments_ids = "reports/{}_reverse_compliments.txt".format(config["blast"]["query_name"])
@@ -90,7 +90,7 @@ rule reverse_complement:
     input:
         fasta = "alignments/{}_alignment.fa".format(config["blast"]["query_name"]),
         rev_compliments_ids = "reports/{}_reverse_compliments.txt".format(config["blast"]["query_name"]),
-        blastfiltered = "reports/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
+        blastfiltered = "reports/{}_BLAST_filtered.tsv".format(config["blast"]["query_name"])
     output:
         outfasta = "alignments/{}_alignment_corrected.fa".format(config["blast"]["query_name"])
     run:
