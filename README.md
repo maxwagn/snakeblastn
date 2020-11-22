@@ -25,3 +25,8 @@ This pipeline can be run on desktop computers, but several requirements need to 
 [3] Edgar, R. C. (2004). MUSCLE: multiple sequence alignment with high accuracy and high throughput. Nucleic acids research, 32(5), 1792-1797.
 
 
+#### Notes
+
+Update query names in fasta files
+
+

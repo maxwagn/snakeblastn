@@ -16,7 +16,7 @@ rule create_local_blastdb:
     input:
         config["blast"]["fasta_db"]
     output:
-        "results/checkpoint_blast_db.txt"
+        "blast_db/checkpoint_blast_db.txt"
     params:
         db_name = "blast_db/{}".format(config["blast"]["db_name"])
     shell:
@@ -27,10 +27,10 @@ rule create_local_blastdb:
 
 rule blastn:
     input:
-        "results/checkpoint_blast_db.txt",
+        "blast_db/checkpoint_blast_db.txt",
         query = config["blast"]["query_fasta"]
     output:
-        "results/{}_BLAST.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST.txt".format(config["blast"]["query_name"])
     params:
         tmp_out = "blast_tmp",
         db_name = "blast_db/{}".format(config["blast"]["db_name"])
@@ -43,9 +43,9 @@ rule blastn:
 
 rule filter_blast_report:
     input:
-        "results/{}_BLAST.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST.txt".format(config["blast"]["query_name"])
     output:
-        "results/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
     params:
         e_value = config["filter_blast"]["evalue"],
         identity = config["filter_blast"]["identity"]
@@ -56,10 +56,10 @@ rule filter_blast_report:
 
 rule bedtools_prep:
     input:
-        "results/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
+        "reports/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
     output:
         bed = "reports/{}_BLAST_filtered.bed".format(config["blast"]["query_name"]),
-        rev_compliments_ids = "reports/reverse_compliments.txt"
+        rev_compliments_ids = "reports/{}_reverse_compliments.txt".format(config["blast"]["query_name"])
     run:
         with open(input[0], "r") as blastreport, open(output.bed, "w") as bedinput, open(output.rev_compliments_ids, "w") as revcom_IDs:
             bed = str()
@@ -67,11 +67,11 @@ rule bedtools_prep:
             for line in blastreport:
                 if line.startswith('qseqid'):
                     pass
-                elif line.split("\t")[8] < line.split("\t")[9]:
-                    bed += line.split("\t")[1] + "\t" + line.split("\t")[8] + "\t" + line.split("\t")[9] + '\n'
-                elif line.split("\t")[8] > line.split("\t")[9]:
+                elif int(line.split("\t")[8]) < int(line.split("\t")[9]):
+                    bed += line.split("\t")[1] + "\t" + line.split("\t")[8] + "\t" + line.split("\t")[9] + '\n' # normal the start is smaller than the end coordinate
+                elif int(line.split("\t")[8]) > int(line.split("\t")[9]):
                     revcom += line.split("\t")[1] + '\n'
-                    bed += line.split("\t")[1] + "\t" + line.split("\t")[9] + "\t" + line.split("\t")[8] + '\n'
+                    bed += line.split("\t")[1] + "\t" + line.split("\t")[9] + "\t" + line.split("\t")[8] + '\n' # reverse complement needed the end is smaller than the start coordinate
             bedinput.write(bed)
             revcom_IDs.write(revcom)
 
@@ -90,7 +90,8 @@ rule bedtools_getfasta:
 rule reverse_complement:
     input:
         fasta = "alignments/{}_alignment.fa".format(config["blast"]["query_name"]),
-        rev_compliments_ids = "reports/reverse_compliments.txt"
+        rev_compliments_ids = "reports/{}_reverse_compliments.txt".format(config["blast"]["query_name"]),
+        blastfiltered = "reports/{}_BLAST_filtered.txt".format(config["blast"]["query_name"])
     output:
         outfasta = "alignments/{}_alignment_corrected.fa".format(config["blast"]["query_name"])
     run:
@@ -105,10 +106,13 @@ rule reverse_complement:
                     seq.append(line)
             if name: yield (name, ''.join(seq))
 
-        with open(input.fasta, "r") as infasta, open(input.rev_compliments_ids, "r") as reverseID, open(output.outfasta, "w") as out:
+        with open(input.fasta, "r") as infasta, open(input.blastfiltered, "r") as blastrep, open(input.rev_compliments_ids, "r") as reverseID, open(output.outfasta, "w") as out:
             complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
             reverse_IDs = []
+            outfastadict = dict()
+            blastcoordinates = dict()
             outfasta = str()
+
             for line in reverseID:
                 line = line.rstrip()
                 if line.startswith("#"):
@@ -116,14 +120,36 @@ rule reverse_complement:
                 else:
                     line = ">" + line
                     reverse_IDs.append(line)
+
             for id in reverse_IDs:
                 for seqID, sequence in read_fasta(infasta):
                     shortname = seqID.split(":")[0]
                     if shortname == id:
                         reverse_complement = "".join(complement.get(base, base) for base in reversed(sequence))
-                        outfasta += seqID + "\n" + reverse_complement + "\n"
+                        id_string = seqID
+                        seq_string = reverse_complement
+                        outfastadict[id_string] = seq_string
                     else:
-                        outfasta += seqID + "\n" + sequence + "\n"
+                        id_string = seqID
+                        seq_string = sequence
+                        outfastadict[id_string] = seq_string
+
+            for line in blastrep:
+                line = line.rstrip()
+                if line.startswith('qseqid'):
+                    pass
+                elif line.split("\t")[8] < line.split("\t")[9]:
+                    blastcoordinates[str(line.split("\t")[8] + "-" + line.split("\t")[9])] = line.split("\t")[0]
+                    print(blastcoordinates)
+                elif line.split("\t")[8] > line.split("\t")[9]:
+                    blastcoordinates[str(line.split("\t")[9] + "-" + line.split("\t")[8])] = line.split("\t")[0] # reverse compliment (coordinates changed)
+                    print(blastcoordinates)
+
+            for seqIDs, sequ in outfastadict.items():
+                for blastcoord, queries in blastcoordinates.items():
+                    if seqIDs.split(":")[1] in blastcoord:
+                        outfasta += seqIDs + " | query: {}".format(queries) + "\n" + sequ + "\n"
+
             out.write(outfasta)
 
 rule muscle_align:
