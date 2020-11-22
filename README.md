@@ -1,6 +1,6 @@
 # snakeblastn - blastn and alignment in snakemake
 
-This is an automated snakemake pipeline [1] for conducting local “blastn” (nucleotide) searches on a custom BLAST database. Both the query and the database file (in fasta format) can be defined by the user in the config.yaml. Furthermore, this pipeline automatically extracts the requested sequences and writes them into fasta format files using “bedtools getfasta” [2]. Additionally, it transcribes reverse complements (that can be obtained during BLASTn search) and finally creates alignment files using MUSCLE [3]. 
+This is an automated snakemake pipeline [1] for conducting local “blastn” (nucleotide) searches on a custom BLAST database. Both the query and the database file (in fasta format) can be defined by the user in the config.yaml. Furthermore, this pipeline automatically extracts the requested sequences and writes them into fasta format files using “bedtools getfasta” [2]. Additionally, it transcribes reverse complements obtained from blastn and finally creates alignment files using MUSCLE [3]. 
 
 ## Prerequisites
 
