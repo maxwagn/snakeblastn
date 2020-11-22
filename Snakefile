@@ -146,7 +146,7 @@ rule reverse_complement:
             for seqIDs, sequ in outfastadict.items():
                 for blastcoord, queries in blastcoordinates.items():
                     if seqIDs.split(":")[1] in blastcoord:
-                        outfasta += seqIDs + " | query: {}".format(queries) + "\n" + sequ + "\n"
+                        outfasta += seqIDs + " | blast-query: {}".format(queries) + "\n" + sequ + "\n"
 
             out.write(outfasta)
 
