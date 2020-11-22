@@ -70,7 +70,7 @@ rule bedtools_prep:
                 elif int(line.split("\t")[8]) < int(line.split("\t")[9]):
                     bed += line.split("\t")[1] + "\t" + line.split("\t")[8] + "\t" + line.split("\t")[9] + '\n' # normal the start is smaller than the end coordinate
                 elif int(line.split("\t")[8]) > int(line.split("\t")[9]):
-                    revcom += line.split("\t")[1] + '\n'
+                    revcom += line.split("\t")[1] + "\t" + str(line.split("\t")[9] + "-" +  line.split("\t")[8]) + '\n' ##### THIS LINE IS CHANGED
                     bed += line.split("\t")[1] + "\t" + line.split("\t")[9] + "\t" + line.split("\t")[8] + '\n' # reverse complement needed the end is smaller than the start coordinate
             bedinput.write(bed)
             revcom_IDs.write(revcom)
@@ -107,7 +107,7 @@ rule reverse_complement:
 
         with open(input.fasta, "r") as infasta, open(input.blastfiltered, "r") as blastrep, open(input.rev_compliments_ids, "r") as reverseID, open(output.outfasta, "w") as out:
             complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'}
-            reverse_IDs = []
+            reverse_IDs = dict()
             outfastadict = dict()
             blastcoordinates = dict()
             outfasta = str()
@@ -117,13 +117,15 @@ rule reverse_complement:
                 if line.startswith("#"):
                     pass
                 else:
-                    line = ">" + line
-                    reverse_IDs.append(line)
+                    line = line.split("\t")
+                    revid = str(">" + line[0])
+                    reverse_IDs[revid]=str(line[1]) # keys are reverse ids and values are ranges
 
-            for id in reverse_IDs:
+            for id, revrange in reverse_IDs.items():
                 for seqID, sequence in read_fasta(infasta):
                     shortname = seqID.split(":")[0]
-                    if shortname == id:
+                    coordrange = seqID.split(":")[1]
+                    if shortname == id and coordrange == revrange:
                         reverse_complement = "".join(complement.get(base, base) for base in reversed(sequence))
                         id_string = seqID
                         seq_string = reverse_complement
