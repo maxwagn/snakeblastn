@@ -139,11 +139,9 @@ rule reverse_complement:
                 if line.startswith('qseqid'):
                     pass
                 elif line.split("\t")[8] < line.split("\t")[9]:
-                    blastcoordinates[str(line.split("\t")[8] + "-" + line.split("\t")[9])] = line.split("\t")[0]
-                    print(blastcoordinates)
+                    blastcoordinates.setdefault(str(line.split("\t")[8] + "-" + line.split("\t")[9]), []).append(line.split("\t")[0])
                 elif line.split("\t")[8] > line.split("\t")[9]:
-                    blastcoordinates[str(line.split("\t")[9] + "-" + line.split("\t")[8])] = line.split("\t")[0] # reverse compliment (coordinates changed)
-                    print(blastcoordinates)
+                    blastcoordinates.setdefault(str(line.split("\t")[9] + "-" + line.split("\t")[8]), []).append(line.split("\t")[0]) # reverse compliment (coordinates changed)
 
             for seqIDs, sequ in outfastadict.items():
                 for blastcoord, queries in blastcoordinates.items():
@@ -162,4 +160,4 @@ rule muscle_align:
     params:
         iterations = config["muscle_alignment"]["iterations"]
     shell:
-         "muscle -in {input} -out {output} -maxiters 2"
+         "muscle -in {input} -out {output} -maxiters {params.iterations}"

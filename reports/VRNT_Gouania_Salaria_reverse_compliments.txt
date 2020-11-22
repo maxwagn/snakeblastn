@@ -1,0 +1,6 @@
+## This file contains all sequence IDs that need to be reverse complemented before an alignment step.
+Lepadogaster_lepadogaster_5664043
+Salarias_fasciatus_CABFVM010001214.1
+Salarias_fasciatus_CABFVM010001214.1
+Salarias_fasciatus_CABFVM010001214.1
+Lepadogaster_lepadogaster_5664043

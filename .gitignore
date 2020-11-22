@@ -1,6 +1,5 @@
 blast_db/
 .DS_Store
 .idea/
-testfile.py
+test.py
 .snakemake/
-trash/
